@@ -46,6 +46,7 @@ dependencies:
   dio: ^5.0.0
   social_media_recorder: ^0.1.86
   responsive_framework: ^0.2.0
+  web_socket_channel: ^2.4.0
 
 dev_dependencies:
   flutter_test:

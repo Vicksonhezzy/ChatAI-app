@@ -6,49 +6,44 @@ import 'package:testai/core/app_export.dart';
 import 'package:testai/core/network/apiCalls.dart';
 
 import 'package:record/record.dart';
-import 'package:testai/presentation/chat_page/models/chat_model.dart';
+import 'package:testai/views/models/chat_model.dart';
 
 class ChatController extends GetxController {
-  Rx<ChatModel> iphone14OneModelObj = ChatModel().obs;
+  static final ChatController instance = Get.find();
+
   TextEditingController textController = TextEditingController();
-  int dataLength = 0;
-  bool isLoading = false;
+  Rx<bool> isLoading = false.obs;
 
   late Timer timer;
 
   ScrollController listScrollController = ScrollController();
 
+  Rx<List> chatList = Rx<List>([]);
+
+  Rx<bool> fetchingChats = true.obs;
+
   @override
   void onInit() {
     super.onInit();
     timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      // if (!loaded && listScrollController.hasClients && dataLength != 0) {
-      //   final position = listScrollController.position.maxScrollExtent;
-      //   listScrollController.jumpTo(position);
-      //   listScrollController.animateTo(position,
-      //       duration: Duration(seconds: 3), curve: Curves.easeOut);
-      //   loaded = true;
-      //   print('started');
-      // }
-      update();
+      loadStreams();
     });
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-    timer.cancel();
+  loadStreams() {
+    fetchChatSream().listen((event) {
+      chatList.value = event;
+      fetchingChats.value = false;
+    });
   }
 
   onSend() async {
-    if (textController.text.isNotEmpty && !isLoading) {
-      isLoading = true;
-      update();
+    if (textController.text.isNotEmpty && !isLoading.value) {
+      isLoading.value = true;
       await postRequest(
           url: 'sendMessage', body: {'message': textController.text});
       textController = TextEditingController();
-      isLoading = false;
-      update();
+      isLoading.value = false;
     }
   }
 
@@ -66,11 +61,10 @@ class ChatController extends GetxController {
     }
 
     try {
-      Directory _directory = await directory.create(recursive: true);
-      _directory = filePath;
-      return _directory;
+      Directory directory0 = await directory.create(recursive: true);
+      directory0 = filePath;
+      return directory0;
     } catch (e) {
-      print(e);
       return null;
     }
   }
@@ -78,7 +72,6 @@ class ChatController extends GetxController {
   onRecord() async {
     if (isRecording) {
       await record.stop();
-      print('stoped');
       update();
     } else {
       if (await record.hasPermission()) {
@@ -92,13 +85,28 @@ class ChatController extends GetxController {
       }
 
       isRecording = await record.isRecording();
-      print('started');
       update();
     }
   }
 
-  Stream<List<ChatModel>> fetchChatSream() {
-    return Stream.fromFuture(getRequest(url: 'getMessages')).asyncMap(
-        (event) => (event as List).map((e) => ChatModel.fromJson(e)).toList());
+  // final channel =
+  //     WebSocketChannel.connect(Uri.parse('${webSocketBaseUrl}getMessages'));
+
+  // void streamMessages() {
+  //   channel.stream.listen((data) {
+  //     print('Received: $data');
+  //     chats.value = (json.decode(data.toString()) as List)
+  //         .map((e) => ChatModel.fromJson(e))
+  //         .toList();
+  //   }, onDone: () {
+  //     print('WebSocket connection is closed.');
+  //   }, onError: (error) {
+  //     print('Error: $error');
+  //   });
+  // }
+
+  Stream fetchChatSream() {
+    return Stream.fromFuture(getRequest(url: 'getMessages'))
+        .asyncMap((event) => event);
   }
 }

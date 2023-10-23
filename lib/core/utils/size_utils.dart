@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:testai/core/app_export.dart';
 
 // This is where the magic happens.
 // This functions are responsible to make UI responsive across all the mobile devices.
 
-Size size = WidgetsBinding.instance.window.physicalSize /
-    WidgetsBinding.instance.window.devicePixelRatio;
+Size size =
+    View.of(Get.context!).physicalSize / View.of(Get.context!).devicePixelRatio;
 
-// Caution! If you think these are static values and are used to build a static UI,  you mustn’t.
-// These are the Viewport values of your Figma Design.
-// These are used in the code as a reference to create your UI Responsively.
 const num FIGMA_DESIGN_WIDTH = 390;
 const num FIGMA_DESIGN_HEIGHT = 844;
 const num FIGMA_DESIGN_STATUS_BAR = 48;
@@ -21,7 +19,7 @@ get width {
 ///This method is used to get device viewport height.
 get height {
   num statusBar =
-      MediaQueryData.fromWindow(WidgetsBinding.instance.window).viewPadding.top;
+      MediaQueryData.fromView(View.of(Get.context!)).viewPadding.top;
   num screenHeight = size.height - statusBar;
   return screenHeight;
 }
@@ -115,3 +113,15 @@ EdgeInsetsGeometry getMarginOrPadding({
     ),
   );
 }
+
+DevicePlatform getPlatform(double width) {
+  if (width <= 600) {
+    return DevicePlatform.mobile;
+  } else if (width <= 1080 && width > 600) {
+    return DevicePlatform.tab;
+  } else {
+    return DevicePlatform.web;
+  }
+}
+
+enum DevicePlatform { web, mobile, tab }

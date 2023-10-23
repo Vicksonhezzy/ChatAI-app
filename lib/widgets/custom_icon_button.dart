@@ -3,7 +3,8 @@ import 'package:testai/core/app_export.dart';
 
 class CustomIconButton extends StatelessWidget {
   CustomIconButton(
-      {this.shape,
+      {super.key,
+      this.shape,
       this.padding,
       this.variant,
       this.alignment,
@@ -33,6 +34,7 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    size = MediaQuery.of(context).size;
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
@@ -46,7 +48,7 @@ class CustomIconButton extends StatelessWidget {
       padding: margin ?? EdgeInsets.zero,
       child: IconButton(
         iconSize: getSize(height ?? 0),
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         icon: Container(
           alignment: Alignment.center,
           width: getSize(width ?? 0),
